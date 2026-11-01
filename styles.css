@@ -65,6 +65,7 @@ button:focus-visible { outline: 4px solid var(--yellow); outline-offset: 3px; }
 .menu-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0, 0, 0, .25); }
 .menu-btn.sort { background: linear-gradient(135deg, #c9a7ff, #8fd3ff); }
 .menu-btn.find { background: linear-gradient(135deg, #ffe08a, #ffb38a); }
+.menu-btn.check { background: linear-gradient(135deg, #ffc2d9, #ffd6a5); }
 .menu-btn.sounds { background: linear-gradient(135deg, #a8f0c6, #8fe3e8); }
 .menu-btn .lvl { font-weight: 700; font-size: .95rem; background: var(--ink); color: #fff; padding: 2px 12px; border-radius: 99px; }
 .menu-btn .big { font-size: 1.8rem; font-weight: 700; }
@@ -201,10 +202,62 @@ button:focus-visible { outline: 4px solid var(--yellow); outline-offset: 3px; }
 #feedback.ok .tick, #feedback.no .cross { display: block; }
 @keyframes stamp { from { transform: scale(0) rotate(-20deg); opacity: 0; } }
 
+/* Level 3: practice check */
+.grown-up-box { background: rgba(255, 255, 255, .1); border-radius: 20px; padding: 12px 18px; margin-bottom: 16px; font-size: 1.05rem; line-height: 1.45; }
+.grown-up-box summary { font-weight: 700; font-size: 1.15rem; cursor: pointer; color: var(--yellow); }
+.grown-up-box ul { margin: 8px 0 0; padding-left: 20px; }
+.grown-up-box li { margin-bottom: 4px; }
+.check-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+.check-tile {
+  background: var(--card); color: var(--ink); border-radius: 20px; padding: 14px 8px; box-shadow: 0 6px 0 rgba(0, 0, 0, .3);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.check-tile:active { transform: translateY(3px); }
+.check-tile .n { font-size: 1.5rem; font-weight: 700; }
+.check-tile .s { font-size: 1rem; color: #6a6490; }
+.check-tile.pass { background: #d4f8e2; }
+.check-tile.tried { background: #fff1c9; }
+.check-tile.surprise { background: linear-gradient(135deg, #c9a7ff, #8fd3ff); }
+.history { margin-top: 20px; color: var(--muted); font-size: 1rem; text-align: center; }
+
+.check-page { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); flex: 1; align-content: start; }
+.check-word {
+  position: relative; background: #fff; color: #000; border-radius: 18px; padding: 26px 12px 12px; min-height: 210px;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .3); border: 5px solid transparent;
+}
+.check-word .text { font-size: clamp(2.6rem, 9vw, 4.4rem); font-weight: 400; display: flex; align-items: center; gap: 12px; }
+.check-word .text svg { width: .9em; height: .9em; flex: none; }
+.check-word .marks { display: flex; gap: 12px; }
+.check-word .marks button { width: 64px; height: 52px; border-radius: 14px; font-size: 1.7rem; font-weight: 700; background: #eee; color: #888; }
+.check-word .marks .yes.on { background: var(--green); color: #fff; }
+.check-word .marks .no.on { background: var(--red); color: #fff; }
+.check-word.marked-yes { border-color: var(--green); }
+.check-word.marked-no { border-color: var(--red); }
+.check-word .hear { position: absolute; top: 6px; right: 8px; font-size: 1.2rem; opacity: .55; padding: 4px; }
+.check-nav { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 18px; }
+.check-nav button:disabled { opacity: .35; }
+
+.results { max-width: 640px; }
+.big-score { font-size: 3rem !important; font-weight: 700; margin: 0 !important; }
+.breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 16px; }
+.breakdown div { background: rgba(255, 255, 255, .1); border-radius: 14px; padding: 10px; font-size: 1.1rem; }
+.breakdown b { display: block; font-size: 1.6rem; color: var(--yellow); }
+.missed { text-align: left; margin-bottom: 18px; font-size: 1.1rem; }
+.missed h3 { margin: 0 0 6px; font-size: 1.2rem; }
+.missed .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.missed .chips span { background: var(--card); color: var(--ink); border-radius: 10px; padding: 2px 10px; font-size: 1.3rem; }
+.missed .chips span.alien { background: #e4d4ff; }
+
 /* Phones in portrait: planets on top, card underneath */
 @media (max-width: 700px) {
   .sort-area { grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; }
   .card-slot { grid-column: 1 / -1; grid-row: 2; }
   .planet svg { max-width: 150px; }
   .word-card { min-width: 0; width: 100%; max-width: 360px; }
+  .check-page { gap: 10px; }
+  .check-word { min-height: 160px; padding: 22px 6px 10px; }
+  .check-word .text { font-size: clamp(1.7rem, 8vw, 2.6rem); gap: 6px; }
+  .check-word .marks { gap: 8px; }
+  .check-word .marks button { width: 48px; height: 46px; }
 }

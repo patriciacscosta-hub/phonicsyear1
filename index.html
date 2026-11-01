@@ -34,6 +34,12 @@
         <span class="small">Listen, then tap the word you hear.</span>
         <span class="art" aria-hidden="true">👂 🔤</span>
       </button>
+      <button class="menu-btn check" data-go="checks">
+        <span class="lvl">Level 3</span>
+        <span class="big">Practice Check</span>
+        <span class="small">Just like the real test: 40 words. A grown-up marks.</span>
+        <span class="art" aria-hidden="true">📝 ⭐</span>
+      </button>
       <button class="menu-btn sounds" data-go="sounds">
         <span class="lvl">Warm up</span>
         <span class="big">Speed Sounds</span>
@@ -120,6 +126,71 @@
     </div>
     <div class="tabs" id="sound-tabs"></div>
     <div class="sound-grid" id="sound-grid"></div>
+  </section>
+
+  <!-- Level 3: choose a practice check -->
+  <section class="screen" id="checks" hidden>
+    <div class="topbar">
+      <button class="icon-btn" data-go="home" aria-label="Home">🏠</button>
+      <h2>Level 3: Practice Check</h2>
+      <span></span>
+    </div>
+    <details class="grown-up-box" open>
+      <summary>For the grown-up: how it works</summary>
+      <ul>
+        <li>Each check has <b>40 words</b> in <b>2 sections</b>, with <b>4 words per page</b>, just like the real Year 1 Phonics Screening Check. It starts with a practice page that doesn't count.</li>
+        <li>Words with an alien next to them are <b>alien (made-up) words</b>. Any sensible reading counts, e.g. <i>jowp</i> can rhyme with "cow" or "low".</li>
+        <li>Your child reads each word <b>out loud</b>. Sounding out first is fine. Tap <b>✓</b> if they read it correctly and <b>✗</b> if not.</li>
+        <li>Don't help or say the word. Tap 🔊 only if <i>you</i> want to hear how a word sounds.</li>
+        <li>The expected standard has been <b>32 out of 40</b> in every year since 2014.</li>
+      </ul>
+    </details>
+    <div class="check-grid" id="check-grid"></div>
+    <div class="history" id="check-history"></div>
+  </section>
+
+  <!-- Level 3: a page of the check -->
+  <section class="screen" id="check" hidden>
+    <div class="topbar">
+      <button class="icon-btn" id="check-quit" aria-label="Stop the check">✖️</button>
+      <h2 id="check-title"></h2>
+      <button class="icon-btn mute-btn" aria-label="Sound on or off">🔊</button>
+    </div>
+    <p class="hint" id="check-sub"></p>
+    <div class="check-page" id="check-page"></div>
+    <div class="check-nav">
+      <button class="big-btn" id="check-prev">⬅️ Back</button>
+      <button class="big-btn primary" id="check-next">Next page ➡️</button>
+    </div>
+  </section>
+
+  <!-- Level 3: between sections -->
+  <section class="screen" id="check-msg" hidden>
+    <div class="done-box">
+      <div class="done-stars" id="check-msg-icon"></div>
+      <h2 id="check-msg-title"></h2>
+      <p id="check-msg-text"></p>
+      <div class="done-btns">
+        <button class="big-btn primary" id="check-msg-go"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Level 3: results -->
+  <section class="screen" id="check-done" hidden>
+    <div class="done-box results">
+      <div class="done-stars" id="check-done-icon"></div>
+      <h2 id="check-done-title"></h2>
+      <p class="big-score" id="check-done-score"></p>
+      <p id="check-done-verdict"></p>
+      <div class="breakdown" id="check-breakdown"></div>
+      <div class="missed" id="check-missed"></div>
+      <div class="done-btns">
+        <button class="big-btn primary" id="check-next-test">📝 Next check</button>
+        <button class="big-btn" data-go="checks">📋 All checks</button>
+        <button class="big-btn" data-go="home">🏠 Home</button>
+      </div>
+    </div>
   </section>
 
   <!-- End of a round -->

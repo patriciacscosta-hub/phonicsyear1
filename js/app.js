@@ -3,7 +3,7 @@
 const ROUND_LENGTH = 10;
 const $ = (sel, root = document) => root.querySelector(sel);
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const shuffle = (arr, rnd = Math.random) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
 function el(tag, cls, text) {
@@ -483,6 +483,202 @@ function confetti() {
 
 $('#again-btn').addEventListener('click', () => startRound(state.stage));
 
+/* ---------- Level 3: Practice Phonics Check ---------- */
+
+const CHECK_COUNT = 20;
+const PASS_MARK = 32;
+const PER_PAGE = 4;
+const ALIEN_SVG = '<svg viewBox="0 0 60 70" aria-label="alien"><line x1="22" y1="16" x2="16" y2="3" stroke="#2fb36b" stroke-width="4" stroke-linecap="round"/><line x1="38" y1="16" x2="44" y2="3" stroke="#2fb36b" stroke-width="4" stroke-linecap="round"/><circle cx="16" cy="3" r="4" fill="#f5a623"/><circle cx="44" cy="3" r="4" fill="#f5a623"/><ellipse cx="30" cy="36" rx="24" ry="22" fill="#3ddc84"/><ellipse cx="30" cy="31" rx="10" ry="9" fill="#fff"/><circle cx="30" cy="32" r="5" fill="#1b1446"/><path d="M21 45 Q30 52 39 45" stroke="#1b1446" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="18" y="56" width="24" height="12" rx="6" fill="#3ddc84"/></svg>';
+
+// Same number -> same check every time, so "Check 3" is always the same 40 words.
+function seeded(seed) {
+  return () => {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Mirrors the real check: Section 1 is simpler (mostly Set 1), Section 2 is harder
+// (Sets 2 and 3, longer and two-syllable words). Alien words come first in each section.
+function buildCheck(id) {
+  const rnd = id === 'surprise' ? Math.random : seeded(id * 7919);
+  const set = n => SETS.find(s => s.id === n);
+  const deal = list => { const pool = shuffle(list, rnd); return n => pool.splice(0, n); };
+  const a1 = deal(set(1).alien), a2 = deal(set(2).alien), a3 = deal(set(3).alien), aX = deal(CHECK_EXTRA.alien);
+  const r1 = deal(set(1).real), r2 = deal(set(2).real), r3 = deal(set(3).real), rX = deal(CHECK_EXTRA.real);
+  const words = (list, alien) => list.map(w => parseWord(w, alien));
+  return {
+    practice: [...words(a1(2), true), ...words(r1(2), false)],
+    sections: [
+      [...words([...a1(9), ...a2(3)], true), ...words([...r1(6), ...r2(2)], false)],
+      [...words([...a2(2), ...a3(4), ...aX(2)], true), ...words([...r2(4), ...r3(5), ...rX(3)], false)],
+    ],
+  };
+}
+
+const check = { id: null, data: null, part: 'practice', page: 0, marks: null };
+
+function checkResult(id) { return store.get(`check-${id}`, null); }
+
+function showChecks() {
+  const grid = $('#check-grid');
+  grid.replaceChildren();
+  for (let n = 1; n <= CHECK_COUNT; n++) {
+    const best = checkResult(n);
+    const b = el('button', 'check-tile' + (best ? (best >= PASS_MARK ? ' pass' : ' tried') : ''));
+    b.append(el('span', 'n', `Check ${n}`), el('span', 's', best ? `Best: ${best}/40${best >= PASS_MARK ? ' ✓' : ''}` : 'Not tried yet'));
+    b.onclick = () => startCheck(n);
+    grid.append(b);
+  }
+  const surprise = el('button', 'check-tile surprise');
+  surprise.append(el('span', 'n', '🎲 Surprise'), el('span', 's', 'New mix every time'));
+  surprise.onclick = () => startCheck('surprise');
+  grid.append(surprise);
+
+  const history = store.get('check-history', []);
+  $('#check-history').textContent = history.length
+    ? 'Recent scores: ' + history.slice(-6).map(h => `${h.name} ${h.score}/40 (${h.date})`).join(' · ')
+    : '';
+  show('checks');
+}
+
+function startCheck(id) {
+  Object.assign(check, { id, data: buildCheck(id), part: 'practice', page: 0, marks: { practice: [], 0: [], 1: [] } });
+  renderCheckPage();
+  show('check');
+}
+
+const checkName = () => check.id === 'surprise' ? 'Surprise check' : `Check ${check.id}`;
+const partWords = () => check.part === 'practice' ? check.data.practice : check.data.sections[check.part];
+const pageCount = () => Math.ceil(partWords().length / PER_PAGE);
+
+function renderCheckPage() {
+  const words = partWords().slice(check.page * PER_PAGE, (check.page + 1) * PER_PAGE);
+  const marks = check.marks[check.part];
+  const offset = check.page * PER_PAGE;
+  $('#check-title').textContent = check.part === 'practice' ? 'Practice page' : `Section ${check.part + 1}`;
+  $('#check-sub').textContent = check.part === 'practice'
+    ? `${checkName()} · Let's practise first. These words don't count.`
+    : `${checkName()} · Page ${check.page + 1} of ${pageCount()}${words[0].alien ? ' · Alien words' : ' · Real words'}`;
+
+  const page = $('#check-page');
+  page.replaceChildren();
+  words.forEach((w, k) => {
+    const idx = offset + k;
+    const card = el('div', 'check-word');
+    const text = el('div', 'text');
+    if (w.alien) text.innerHTML = ALIEN_SVG;
+    text.append(el('span', null, w.text));
+    const hear = el('button', 'hear', '🔊');
+    hear.setAttribute('aria-label', `Grown-up: hear ${w.text}`);
+    hear.onclick = () => speak(w.say, 0.8);
+    const yes = el('button', 'yes', '✓'), no = el('button', 'no', '✗');
+    yes.setAttribute('aria-label', `${w.text} read correctly`);
+    no.setAttribute('aria-label', `${w.text} not read correctly`);
+    const paint = () => {
+      yes.classList.toggle('on', marks[idx] === true);
+      no.classList.toggle('on', marks[idx] === false);
+      card.classList.toggle('marked-yes', marks[idx] === true);
+      card.classList.toggle('marked-no', marks[idx] === false);
+      $('#check-next').disabled = words.some((_, j) => marks[offset + j] == null);
+    };
+    yes.onclick = () => { marks[idx] = true; beep([[660, 0.12]]); paint(); };
+    no.onclick = () => { marks[idx] = false; beep([[300, 0.12, 'triangle']]); paint(); };
+    const row = el('div', 'marks');
+    row.append(yes, no);
+    card.append(hear, text, row);
+    page.append(card);
+    paint();
+  });
+  $('#check-prev').disabled = check.part === 'practice' ? check.page === 0 : false;
+  const lastPage = check.page === pageCount() - 1;
+  $('#check-next').textContent = !lastPage ? 'Next page ➡️'
+    : check.part === 'practice' ? 'Start Section 1 ➡️'
+    : check.part === 0 ? 'Finish Section 1 ➡️' : 'Finish the check 🏁';
+}
+
+function checkMessage(icon, title, text, button, onGo) {
+  $('#check-msg-icon').textContent = icon;
+  $('#check-msg-title').textContent = title;
+  $('#check-msg-text').textContent = text;
+  $('#check-msg-go').textContent = button;
+  $('#check-msg-go').onclick = onGo;
+  show('check-msg');
+}
+
+$('#check-next').addEventListener('click', () => {
+  if (check.page < pageCount() - 1) { check.page++; renderCheckPage(); window.scrollTo(0, 0); return; }
+  if (check.part === 'practice') {
+    checkMessage('📝', 'Section 1', 'Now for the real words! Read each word out loud. Some are real and some are alien words.',
+      'Start Section 1', () => { check.part = 0; check.page = 0; renderCheckPage(); show('check'); });
+  } else if (check.part === 0) {
+    checkMessage('🌟', 'Section 1 done!', 'Great work, astronaut! Have a little break and a stretch before Section 2.',
+      'Start Section 2', () => { check.part = 1; check.page = 0; renderCheckPage(); show('check'); });
+  } else {
+    finishCheck();
+  }
+});
+
+$('#check-prev').addEventListener('click', () => {
+  if (check.page > 0) check.page--;
+  else if (check.part === 1) { check.part = 0; check.page = pageCount() - 1; }
+  else if (check.part === 0) { check.part = 'practice'; check.page = pageCount() - 1; }
+  renderCheckPage();
+});
+
+$('#check-quit').addEventListener('click', () => {
+  if (confirm('Stop this check? The marks so far won\'t be saved.')) showChecks();
+});
+
+function finishCheck() {
+  const all = [0, 1].flatMap(s => check.data.sections[s].map((w, i) => ({ w, ok: check.marks[s][i] === true, s })));
+  const score = all.filter(r => r.ok).length;
+  const count = f => all.filter(r => f(r) && r.ok).length;
+  const pass = score >= PASS_MARK;
+
+  if (check.id !== 'surprise') store.set(`check-${check.id}`, Math.max(score, checkResult(check.id) || 0));
+  const history = store.get('check-history', []);
+  history.push({ name: checkName(), score, date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) });
+  store.set('check-history', history.slice(-30));
+
+  $('#check-done-icon').textContent = pass ? '🏆' : '🚀';
+  $('#check-done-title').textContent = pass ? 'Brilliant reading!' : 'Well done for finishing!';
+  $('#check-done-score').textContent = `${score} / 40`;
+  $('#check-done-verdict').textContent = pass
+    ? `That's at or above ${PASS_MARK}, the score children have needed to reach the expected standard. On track!`
+    : `The expected standard has been ${PASS_MARK} out of 40. ${PASS_MARK - score} more to go. Keep practising the words below!`;
+
+  const box = $('#check-breakdown');
+  box.replaceChildren();
+  [['Section 1', count(r => r.s === 0)], ['Section 2', count(r => r.s === 1)],
+    ['🌍 Real words', count(r => !r.w.alien)], ['👽 Alien words', count(r => r.w.alien)]].forEach(([label, n]) => {
+    const d = el('div');
+    d.append(el('b', null, `${n}/20`), label);
+    box.append(d);
+  });
+
+  const missed = all.filter(r => !r.ok);
+  const m = $('#check-missed');
+  m.replaceChildren();
+  if (missed.length) {
+    m.append(el('h3', null, 'Words to practise'));
+    const chips = el('div', 'chips');
+    missed.forEach(r => chips.append(el('span', r.w.alien ? 'alien' : null, (r.w.alien ? '👽 ' : '') + r.w.text)));
+    m.append(chips);
+  }
+
+  const next = typeof check.id === 'number' && check.id < CHECK_COUNT ? check.id + 1 : null;
+  $('#check-next-test').hidden = !next && check.id !== 'surprise';
+  $('#check-next-test').textContent = next ? `📝 Check ${next}` : '🎲 Another surprise';
+  $('#check-next-test').onclick = () => startCheck(next || 'surprise');
+
+  show('check-done');
+  if (pass) confetti();
+  speak(pass ? 'Brilliant reading!' : 'Well done for finishing!');
+}
+
 /* ---------- Speed sounds ---------- */
 
 function showSounds(setId = 1) {
@@ -516,6 +712,7 @@ document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', 
   const go = b.dataset.go;
   if (go === 'stages') showStages(state.game);
   else if (go === 'sounds') showSounds();
+  else if (go === 'checks') showChecks();
   else show(go);
 }));
 document.querySelectorAll('.mute-btn').forEach(b => b.addEventListener('click', () => {
