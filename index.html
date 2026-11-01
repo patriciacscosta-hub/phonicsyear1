@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#1b1446">
+  <title>Phonics Space Quest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="stars" aria-hidden="true"></div>
+
+  <!-- Home -->
+  <section class="screen" id="home">
+    <header class="title">
+      <div class="rocket" aria-hidden="true">🚀</div>
+      <h1>Phonics Space Quest</h1>
+      <p>Get ready for the Year 1 Phonics Check!</p>
+    </header>
+    <div class="menu">
+      <button class="menu-btn sort" data-game="sort">
+        <span class="lvl">Level 1</span>
+        <span class="big">Alien or Earth?</span>
+        <span class="small">Read the word. Drag it home!</span>
+        <span class="art" aria-hidden="true">👽 🌍</span>
+      </button>
+      <button class="menu-btn find" data-game="find">
+        <span class="lvl">Level 2</span>
+        <span class="big">Find the Word</span>
+        <span class="small">Listen, then tap the word you hear.</span>
+        <span class="art" aria-hidden="true">👂 🔤</span>
+      </button>
+      <button class="menu-btn sounds" data-go="sounds">
+        <span class="lvl">Warm up</span>
+        <span class="big">Speed Sounds</span>
+        <span class="small">Tap a sound to hear it.</span>
+        <span class="art" aria-hidden="true">🔊</span>
+      </button>
+    </div>
+    <p class="grown-up">Follows the Read Write Inc. Speed Sound order: Set 1 → Set 2 → Set 3.</p>
+  </section>
+
+  <!-- Choose a stage -->
+  <section class="screen" id="stages" hidden>
+    <div class="topbar">
+      <button class="icon-btn" data-go="home" aria-label="Home">🏠</button>
+      <h2 id="stages-title"></h2>
+      <span></span>
+    </div>
+    <p class="hint" id="stages-hint"></p>
+    <div class="stage-grid" id="stage-grid"></div>
+  </section>
+
+  <!-- Level 1: Alien or Earth -->
+  <section class="screen" id="sort" hidden>
+    <div class="topbar">
+      <button class="icon-btn" data-go="stages" aria-label="Back">⬅️</button>
+      <div class="progress" id="sort-progress"></div>
+      <button class="icon-btn mute-btn" aria-label="Sound on or off">🔊</button>
+    </div>
+    <p class="hint">Fred Talk it! Tap the dots. Then drag the word to <b>Earth</b> or the <b>alien planet</b>.</p>
+    <div class="sort-area">
+      <button class="planet alien-planet" id="zone-alien" data-zone="alien" aria-label="Alien planet">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <ellipse cx="100" cy="120" rx="96" ry="22" fill="none" stroke="#ffd166" stroke-width="8" opacity=".9"/>
+          <circle cx="100" cy="110" r="70" fill="#9b5de5"/>
+          <circle cx="70" cy="90" r="12" fill="#7b3fc4"/><circle cx="130" cy="140" r="16" fill="#7b3fc4"/><circle cx="140" cy="85" r="7" fill="#7b3fc4"/>
+          <path d="M4 120 A96 22 0 0 0 196 120" fill="none" stroke="#ffd166" stroke-width="8"/>
+          <g transform="translate(100 46)">
+            <line x1="-12" y1="-26" x2="-18" y2="-44" stroke="#3ddc84" stroke-width="5" stroke-linecap="round"/>
+            <line x1="12" y1="-26" x2="18" y2="-44" stroke="#3ddc84" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="-18" cy="-46" r="6" fill="#ffd166"/><circle cx="18" cy="-46" r="6" fill="#ffd166"/>
+            <ellipse cx="0" cy="-6" rx="30" ry="26" fill="#3ddc84"/>
+            <ellipse cx="0" cy="-10" rx="13" ry="11" fill="#fff"/><circle cx="0" cy="-9" r="6" fill="#1b1446"/>
+            <path d="M-10 6 Q0 14 10 6" stroke="#1b1446" stroke-width="4" fill="none" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>Alien planet</span>
+      </button>
+
+      <div class="card-slot"><div class="word-card" id="sort-card"></div></div>
+
+      <button class="planet earth-planet" id="zone-earth" data-zone="earth" aria-label="Earth">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="105" r="80" fill="#2f80ed"/>
+          <path d="M55 60 q20 -15 40 0 q10 15 -5 25 q-15 5 -10 20 q5 15 -15 15 q-20 -5 -22 -25 q-2 -20 12 -35z" fill="#3ddc84"/>
+          <path d="M120 95 q25 -10 40 10 q8 20 -10 35 q-20 15 -30 0 q-10 -15 0 -25 q-8 -12 0 -20z" fill="#3ddc84"/>
+          <path d="M110 40 q15 -5 25 5 q-5 10 -20 8z" fill="#3ddc84"/>
+          <circle cx="100" cy="105" r="80" fill="none" stroke="#bfe3ff" stroke-width="5" opacity=".6"/>
+        </svg>
+        <span>Earth</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Level 2: Find the word -->
+  <section class="screen" id="find" hidden>
+    <div class="topbar">
+      <button class="icon-btn" data-go="stages" aria-label="Back">⬅️</button>
+      <div class="progress" id="find-progress"></div>
+      <button class="icon-btn mute-btn" aria-label="Sound on or off">🔊</button>
+    </div>
+    <div class="find-prompt">
+      <button class="listen-btn" id="listen-btn" aria-label="Hear the word again">👂<span>Listen</span></button>
+      <p id="find-text"></p>
+    </div>
+    <div class="options" id="options"></div>
+  </section>
+
+  <!-- Speed sounds -->
+  <section class="screen" id="sounds" hidden>
+    <div class="topbar">
+      <button class="icon-btn" data-go="home" aria-label="Home">🏠</button>
+      <h2>Speed Sounds</h2>
+      <button class="icon-btn mute-btn" aria-label="Sound on or off">🔊</button>
+    </div>
+    <div class="tabs" id="sound-tabs"></div>
+    <div class="sound-grid" id="sound-grid"></div>
+  </section>
+
+  <!-- End of a round -->
+  <section class="screen" id="done" hidden>
+    <div class="done-box">
+      <div class="done-stars" id="done-stars"></div>
+      <h2 id="done-title"></h2>
+      <p id="done-score"></p>
+      <div class="done-btns">
+        <button class="big-btn" id="again-btn">🔁 Play again</button>
+        <button class="big-btn primary" id="next-btn">🚀 Next level</button>
+        <button class="big-btn" data-go="home">🏠 Home</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="feedback" aria-live="polite" hidden>
+    <svg class="tick" viewBox="0 0 100 100" aria-label="Correct"><circle cx="50" cy="50" r="46" fill="#3ddc84"/><path d="M28 52 L44 68 L74 34" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg class="cross" viewBox="0 0 100 100" aria-label="Not quite"><circle cx="50" cy="50" r="46" fill="#ff5a5f"/><path d="M33 33 L67 67 M67 33 L33 67" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/></svg>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
