@@ -104,46 +104,9 @@ function wordText(tokens) {
 
 const display = t => t.replace('~', '').replace('_', '-');
 
-function grapheme(letters, token, mark) {
-  const g = el('span', 'g');
-  g.dataset.token = token;
-  g.append(el('span', 'l', letters));
-  if (mark) g.append(el('span', 'mark ' + mark));
-  return g;
-}
-
-// Draws a word with RWI sound buttons: a dot under single letters, a dash under
-// "special friends" and a curved line joining split digraphs.
+// Plain word with no sound buttons: the child spots the special friends themselves.
 function renderWord(tokens) {
-  const wrap = el('div', 'word');
-  for (let i = 0; i < tokens.length; i++) {
-    const t = tokens[i];
-    if (t.includes('_') && i + 1 < tokens.length) {
-      const next = tokens[i + 1].replace('~', '');
-      const split = el('span', 'split');
-      split.dataset.token = t;
-      const v = grapheme(t[0], t, null), e = grapheme('e', t, null);
-      v.classList.add('v'); e.classList.add('v');
-      const arc = el('span', 'arc');
-      arc.dataset.token = t;
-      split.append(v, grapheme(next, tokens[i + 1], next.length > 1 ? 'dash' : 'dot'), e, arc);
-      wrap.append(split);
-      i++;
-    } else {
-      const clean = display(t).replace('-', '');
-      const letters = t.includes('_') ? t[0] + 'e' : clean;
-      wrap.append(grapheme(letters, t, letters.length > 1 ? 'dash' : 'dot'));
-    }
-  }
-  return wrap;
-}
-
-function speakSound(token, node) {
-  const info = SOUND_INFO[token];
-  if (!info) return;
-  const lit = node.closest('.split') || node.closest('.g');
-  if (lit) { lit.classList.add('lit'); setTimeout(() => lit.classList.remove('lit'), 700); }
-  speak(info[0], 0.7);
+  return el('div', 'word', wordText(tokens));
 }
 
 /* ---------- Building rounds ---------- */
@@ -292,7 +255,7 @@ function nextSort() {
   card.className = 'word-card';
   card.style.transform = '';
   card.style.opacity = '';
-  card.replaceChildren(renderWord(word.tokens), el('span', 'drag-hint', 'tap the dots · drag me'));
+  card.replaceChildren(renderWord(word.tokens), el('span', 'drag-hint', 'drag me'));
   void card.offsetWidth;
   card.classList.add('enter');
   state.busy = false;
@@ -309,7 +272,7 @@ function zoneAt(x, y) {
 
 card.addEventListener('pointerdown', e => {
   if (state.busy) return;
-  drag = { x: e.clientX, y: e.clientY, moved: false, target: e.target, id: e.pointerId };
+  drag = { x: e.clientX, y: e.clientY, moved: false, id: e.pointerId };
   card.setPointerCapture(e.pointerId);
 });
 
@@ -334,11 +297,7 @@ function endDrag(e) {
   drag = null;
   card.classList.remove('dragging');
   document.querySelectorAll('.planet').forEach(p => p.classList.remove('hover'));
-  if (!d.moved) {
-    const t = d.target.closest('[data-token]');
-    if (t) speakSound(t.dataset.token, t);
-    return;
-  }
+  if (!d.moved) return;
   const zone = e.type === 'pointerup' ? zoneAt(e.clientX, e.clientY) : null;
   if (zone) answerSort(zone);
   else { card.classList.add('back'); card.style.transform = ''; }

@@ -103,21 +103,8 @@ button:focus-visible { outline: 4px solid var(--yellow); outline-offset: 3px; }
 .stage .best .on { color: #f5a623; }
 .stage.mixed { background: linear-gradient(135deg, #fff3c4, #ffd6e7); }
 
-/* Word with RWI sound buttons */
-.word { display: inline-flex; align-items: flex-start; justify-content: center; gap: .06em; font-size: clamp(3.4rem, 13vw, 6rem); font-weight: 700; line-height: 1; color: var(--ink); }
-.g { position: relative; display: inline-flex; flex-direction: column; align-items: center; padding: 0 .02em .38em; border-radius: 12px; transition: background .15s; }
-.g .l { display: block; }
-.g .mark { position: absolute; bottom: .1em; left: 50%; transform: translateX(-50%); background: var(--ink); }
-.g .mark.dot { width: .2em; height: .2em; border-radius: 50%; }
-.g .mark.dash { width: 70%; height: .12em; border-radius: 99px; }
-.g.lit { background: var(--yellow); }
-.split { position: relative; display: inline-flex; gap: .06em; padding-bottom: .3em; }
-.split .arc {
-  position: absolute; left: .15em; right: .15em; bottom: 0; height: .32em;
-  border: .09em solid var(--ink); border-top: 0; border-radius: 0 0 1em 1em;
-}
-.split.lit .arc { border-color: #e08a00; }
-.split.lit > .g.v { background: var(--yellow); }
+/* Words */
+.word { display: block; text-align: center; font-size: clamp(3.4rem, 13vw, 6rem); font-weight: 700; line-height: 1.1; color: var(--ink); }
 
 /* Level 1 */
 .sort-area {
